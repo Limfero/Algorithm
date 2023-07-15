@@ -1,4 +1,4 @@
-﻿namespace Algorith.Extentions
+﻿namespace SortAndSearch.Extentions
 {
     internal static class ArrayExtensions
     {

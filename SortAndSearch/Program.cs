@@ -1,7 +1,7 @@
-﻿using Algorith.Extentions;
+﻿using SortAndSearch.Extentions;
 using System.Diagnostics;
 
-namespace Algorith
+namespace SortAndSearch
 {
     internal class Program
     {

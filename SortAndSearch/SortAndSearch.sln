@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Algorithm", "Algorithm.csproj", "{2A003815-A211-4939-8949-88C4F906306A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SortAndSearch", "SortAndSearch.csproj", "{2A003815-A211-4939-8949-88C4F906306A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
