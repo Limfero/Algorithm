@@ -6,7 +6,6 @@
 
         private List<int> AllVertices { get { return GetAllVertices(); } }
 
-        private readonly string VertexDoesNotExist = "There is no such vertex";
         private readonly string EdgeAlreadyExists = "Such a edge already exists!";
 
         public Graph()
@@ -31,10 +30,10 @@
             for (int i = inDegree.Count; i > 0; i--)
                 if (inDegree[i] == 0)
                     next.Push(i);
-            return GetLibearOrderedVertices(inDegree, next);
+            return GetLinearOrderedVertices(inDegree, next);
         }
 
-        private List<int> GetLibearOrderedVertices(Dictionary<int, int> inDegree, Stack<int> next)
+        private List<int> GetLinearOrderedVertices(Dictionary<int, int> inDegree, Stack<int> next)
         {
             List<int> result = new();
 
