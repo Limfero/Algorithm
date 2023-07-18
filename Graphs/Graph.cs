@@ -79,6 +79,18 @@
             return _shortest;
         }
 
+        public int[] FindNegativeWeightCycle()
+        {
+            this.BellmanFord(AllVertices.First());
+
+            foreach (var edge in Edges)
+            {
+                if (_shortest[edge.StartVertex] + edge.Weight < _shortest[edge.EndVertex]) { }
+            }
+
+            throw new NotImplementedException();
+        }
+
         private void InitializeShortestAndPred(int vertex)
         {
             _shortest = new double[AllVertices.Count];
