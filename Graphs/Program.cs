@@ -24,7 +24,27 @@
 
             List<int> ints = graph.TopologicalSort();
 
+            graph = new();
+
+            graph.AddEdge(new(1, 2, 4));
+            graph.AddEdge(new(1, 3, 5));
+            graph.AddEdge(new(2, 3, 1));
+            graph.AddEdge(new(3, 2, 2));
+            graph.AddEdge(new(3, 4, 3));
+            graph.AddEdge(new(2, 4, 9));
+            graph.AddEdge(new(2, 5, 3));
+            graph.AddEdge(new(4, 5, 4));
+            graph.AddEdge(new(5, 4, 5));
+            graph.AddEdge(new(5, 1, 7));
+
+            double[] shortest = graph.Dijkstra(1);
+
             foreach (var vertex in ints)
+                Console.WriteLine(vertex);
+
+            Console.WriteLine();
+
+            foreach (var vertex in shortest)
                 Console.WriteLine(vertex);
         }
     }
