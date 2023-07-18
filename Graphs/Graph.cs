@@ -5,6 +5,8 @@
         public List<Edge> Edges { get; private set; }
 
         private List<int> AllVertices { get { return GetAllVertices(); } }
+        private double[] _shortest;
+        private int[] _pred;
 
         private readonly string EdgeAlreadyExists = "Such a edge already exists!";
 
@@ -31,6 +33,52 @@
                 if (inDegree[i] == 0)
                     next.Push(i);
             return GetLinearOrderedVertices(inDegree, next);
+        }
+
+        public double[] DagShortestPath(int vertex)
+        {
+            List<int> linearOrdered = TopologicalSort();
+            InitializeShortestAndPred(vertex);
+
+            foreach (var v in linearOrdered)
+                foreach (var edge in GetEdgesByVertex(v))
+                    Relax(edge);
+
+            return _shortest;
+        }
+
+        public double[] Dijkstra(int vertex)
+        {
+            InitializeShortestAndPred(vertex);
+
+            Dictionary<int, double> vertices = new();
+            foreach (var item in AllVertices)
+                vertices.Add(item, _shortest[item - 1]);
+
+            while (vertices.Count != 0)
+            {
+                KeyValuePair<int, double> shortest = vertices.FirstOrDefault(x => x.Value == vertices.Values.Min());
+
+                vertices.Remove(shortest.Key);
+
+                foreach (var edge in GetEdgesByVertex(shortest.Key))
+                    Relax(edge);
+            }
+
+            return _shortest;
+        }
+
+        private void InitializeShortestAndPred(int vertex)
+        {
+            _shortest = new double[AllVertices.Count];
+            _pred = new int[AllVertices.Count];
+
+            for (int i = 0; i < _shortest.Length; i++)
+                if (i != vertex - 1)
+                    _shortest[i] = double.PositiveInfinity;
+
+            foreach (var item in AllVertices)
+                _pred[item - 1] = -1;
         }
 
         private List<int> GetLinearOrderedVertices(Dictionary<int, int> inDegree, Stack<int> next)
@@ -101,6 +149,15 @@
                     result.Add(edge);
 
             return result;
+        }
+
+        private void Relax(Edge edge)
+        {
+            if (_shortest[edge.StartVertex - 1] + edge.Weight < _shortest[edge.EndVertex - 1])
+            {
+                _shortest[edge.EndVertex - 1] = _shortest[edge.StartVertex - 1] + edge.Weight;
+                _pred[edge.EndVertex - 1] = edge.StartVertex;
+            }
         }
     }
 }
