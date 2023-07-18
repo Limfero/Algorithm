@@ -38,6 +38,7 @@
             graph.AddEdge(new(5, 1, 7));
 
             double[] shortest = graph.Dijkstra(1);
+            double[] shortestBF = graph.BellmanFord(1);
 
             foreach (var vertex in ints)
                 Console.WriteLine(vertex);
@@ -45,7 +46,12 @@
             Console.WriteLine();
 
             foreach (var vertex in shortest)
-                Console.WriteLine(vertex);
+                Console.Write("{0} ", vertex);
+
+            Console.WriteLine();
+
+            foreach (var vertex in shortestBF)
+                Console.Write("{0} ", vertex);
         }
     }
 }
