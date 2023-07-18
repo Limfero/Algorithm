@@ -68,6 +68,17 @@
             return _shortest;
         }
 
+        public double[] BellmanFord(int vertex)
+        {
+            InitializeShortestAndPred(vertex);
+
+            for (int i = 0; i < AllVertices.Count - 1; i++)
+                foreach (var edge in Edges)
+                    Relax(edge);
+
+            return _shortest;
+        }
+
         private void InitializeShortestAndPred(int vertex)
         {
             _shortest = new double[AllVertices.Count];
