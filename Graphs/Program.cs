@@ -1,4 +1,6 @@
-﻿namespace Graphs
+﻿using System;
+
+namespace Graphs
 {
     internal class Program
     {
@@ -22,36 +24,37 @@
             graph.AddEdge(new(8, 13, 1));
             graph.AddEdge(new(13, 14, 1));
 
-            List<int> ints = graph.TopologicalSort();
+            int[] ints = graph.TopologicalSort();
 
             graph = new();
 
-            graph.AddEdge(new(1, 2, 4));
-            graph.AddEdge(new(1, 3, 5));
-            graph.AddEdge(new(2, 3, 1));
-            graph.AddEdge(new(3, 2, 2));
-            graph.AddEdge(new(3, 4, 3));
-            graph.AddEdge(new(2, 4, 9));
-            graph.AddEdge(new(2, 5, 3));
-            graph.AddEdge(new(4, 5, 4));
-            graph.AddEdge(new(5, 4, 5));
-            graph.AddEdge(new(5, 1, 7));
+            graph.AddEdge(new(1, 2, 7));
+            graph.AddEdge(new(1, 3, 6));
+            graph.AddEdge(new(3, 2, 8));
+            graph.AddEdge(new(3, 4, 5));
+            graph.AddEdge(new(4, 3, -2));
+            graph.AddEdge(new(2, 4, -3));
+            graph.AddEdge(new(2, 5, 9));
+            graph.AddEdge(new(5, 4, 7));
+            graph.AddEdge(new(5, 1, 2));
+            graph.AddEdge(new(3, 5, -4));
 
             double[] shortest = graph.Dijkstra(1);
             double[] shortestBF = graph.BellmanFord(1);
+            int[] cycle = graph.FindNegativeWeightCycle();
 
-            foreach (var vertex in ints)
-                Console.WriteLine(vertex);
+            Write(ints);
+            Write(shortest);
+            Write(shortestBF);
+            Write(cycle);
+        }
 
-            Console.WriteLine();
-
-            foreach (var vertex in shortest)
+        private static void Write(Array array)
+        {
+            foreach (var vertex in array)
                 Console.Write("{0} ", vertex);
 
             Console.WriteLine();
-
-            foreach (var vertex in shortestBF)
-                Console.Write("{0} ", vertex);
         }
     }
 }
