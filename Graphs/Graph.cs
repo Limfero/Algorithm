@@ -13,6 +13,8 @@
         public Graph()
         {
             Edges = new();
+            _shortest = Array.Empty<double>();
+            _pred = Array.Empty<int>();
         }
 
         public void AddEdge(Edge edge)
@@ -23,7 +25,7 @@
             Edges.Add(edge);
         }
 
-        public List<int> TopologicalSort()
+        public int[] TopologicalSort()
         {
             Dictionary<int, int> inDegree = GetAllVertexRelationships();
 
@@ -32,12 +34,12 @@
             for (int i = inDegree.Count; i > 0; i--)
                 if (inDegree[i] == 0)
                     next.Push(i);
-            return GetLinearOrderedVertices(inDegree, next);
+            return GetLinearOrderedVertices(inDegree, next).ToArray();
         }
 
         public double[] DagShortestPath(int vertex)
         {
-            List<int> linearOrdered = TopologicalSort();
+            int[] linearOrdered = TopologicalSort();
             InitializeShortestAndPred(vertex);
 
             foreach (var v in linearOrdered)
@@ -84,11 +86,42 @@
             this.BellmanFord(AllVertices.First());
 
             foreach (var edge in Edges)
+                if (_shortest[edge.StartVertex] + edge.Weight < _shortest[edge.EndVertex])
+                {
+                    int cycleStartVertex = FindingCycleStartVertex(edge);
+                    return SearchAllVerticesInCycle(cycleStartVertex);
+                }
+
+            return Array.Empty<int>();
+        }
+
+        private int[] SearchAllVerticesInCycle(int cycleStartVertex)
+        {
+            int vertexInCycle = _pred[cycleStartVertex];
+            Stack<int> cycle = new();
+            cycle.Push(cycleStartVertex);
+
+            while (vertexInCycle != cycleStartVertex)
             {
-                if (_shortest[edge.StartVertex] + edge.Weight < _shortest[edge.EndVertex]) { }
+                cycle.Push(vertexInCycle);
+                vertexInCycle = _pred[vertexInCycle];
             }
 
-            throw new NotImplementedException();
+            return cycle.ToArray();
+        }
+
+        private int FindingCycleStartVertex(Edge edge)
+        {
+            bool[] visited = new bool[AllVertices.Count];
+            int thisVertex = edge.EndVertex;
+
+            while (visited[thisVertex] == false)
+            {
+                visited[thisVertex] = true;
+                thisVertex = _pred[thisVertex];
+            }
+
+            return thisVertex;
         }
 
         private void InitializeShortestAndPred(int vertex)
