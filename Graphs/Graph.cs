@@ -5,16 +5,12 @@
         public List<Edge> Edges { get; private set; }
 
         private List<int> AllVertices { get { return GetAllVertices(); } }
-        private double[] _shortest;
-        private int[] _pred;
 
         private readonly string EdgeAlreadyExists = "Such a edge already exists!";
 
         public Graph()
         {
             Edges = new();
-            _shortest = Array.Empty<double>();
-            _pred = Array.Empty<int>();
         }
 
         public void AddEdge(Edge edge)
@@ -40,77 +36,121 @@
         public double[] DagShortestPath(int vertex)
         {
             int[] linearOrdered = TopologicalSort();
-            InitializeShortestAndPred(vertex);
+            InitializeShortestAndPred(vertex, out double[] shortest, out int[] pred);
 
             foreach (var v in linearOrdered)
                 foreach (var edge in GetEdgesByVertex(v))
-                    Relax(edge);
+                    Relax(edge, shortest, pred);
 
-            return _shortest;
+            return shortest;
         }
 
         public double[] Dijkstra(int vertex)
         {
-            InitializeShortestAndPred(vertex);
+            InitializeShortestAndPred(vertex, out double[] shortest, out int[] pred);
 
             Dictionary<int, double> vertices = new();
             foreach (var item in AllVertices)
-                vertices.Add(item, _shortest[item - 1]);
+                vertices.Add(item, shortest[item - 1]);
 
             while (vertices.Count != 0)
             {
-                KeyValuePair<int, double> shortest = vertices.FirstOrDefault(x => x.Value == vertices.Values.Min());
+                KeyValuePair<int, double> shortestEdge = vertices.FirstOrDefault(x => x.Value == vertices.Values.Min());
 
-                vertices.Remove(shortest.Key);
+                vertices.Remove(shortestEdge.Key);
 
-                foreach (var edge in GetEdgesByVertex(shortest.Key))
-                    Relax(edge);
+                foreach (var edge in GetEdgesByVertex(shortestEdge.Key))
+                    Relax(edge, shortest, pred);
             }
 
-            return _shortest;
+            return shortest;
         }
 
-        public double[] BellmanFord(int vertex)
+        public List<Array> BellmanFord(int vertex)
         {
-            InitializeShortestAndPred(vertex);
+            InitializeShortestAndPred(vertex, out double[] shortest, out int[] pred);
 
             for (int i = 0; i < AllVertices.Count - 1; i++)
                 foreach (var edge in Edges)
-                    Relax(edge);
+                    Relax(edge, shortest, pred);
 
-            return _shortest;
+            return new() { shortest, pred };
         }
 
         public int[] FindNegativeWeightCycle()
         {
-            this.BellmanFord(AllVertices.First());
+            double[] shortest = (double[])BellmanFord(AllVertices.First())[0];
+            int[] pred = (int[])BellmanFord(AllVertices.First())[1];
 
             foreach (var edge in Edges)
-                if (_shortest[edge.StartVertex] + edge.Weight < _shortest[edge.EndVertex])
+                if (shortest[edge.StartVertex] + edge.Weight < shortest[edge.EndVertex])
                 {
-                    int cycleStartVertex = FindingCycleStartVertex(edge);
-                    return SearchAllVerticesInCycle(cycleStartVertex);
+                    int cycleStartVertex = FindingCycleStartVertex(edge, pred);
+                    return SearchAllVerticesInCycle(cycleStartVertex, pred);
                 }
 
             return Array.Empty<int>();
         }
 
-        private int[] SearchAllVerticesInCycle(int cycleStartVertex)
+        public Dictionary<string, double> FloydWarshall()
         {
-            int vertexInCycle = _pred[cycleStartVertex];
+            InitializeShortest(out double[,] shortest);
+
+            FindingShortestPathForEachVertex(shortest);
+
+            return GetResult(shortest);
+        }
+
+        private Dictionary<string, double> GetResult(double[,] shortest)
+        {
+            Dictionary<string, double> result = new();
+
+            for (int u = 0; u < AllVertices.Count; u++)
+                for (int v = 0; v < AllVertices.Count; v++)
+                    if(u != v)
+                        result.Add(string.Format("{0} - {1}", u + 1, v + 1), shortest[u, v]);
+
+            return result;
+        }
+
+        private void FindingShortestPathForEachVertex(double[,] shortest)
+        {
+            for (int k = 0; k < AllVertices.Count; k++)
+                for (int i = 0; i < AllVertices.Count; i++)
+                    for (int j = 0; j < AllVertices.Count; j++)
+                        if (shortest[i, j] > shortest[i, k] + shortest[k, j])
+                            shortest[i, j] = shortest[i, k] + shortest[k, j];
+        }
+
+        private void InitializeShortest(out double[,] shortest)
+        {
+            shortest = new double[AllVertices.Count, AllVertices.Count];
+
+            foreach (var edge in Edges)
+                shortest[edge.StartVertex - 1, edge.EndVertex - 1] = edge.Weight;
+
+            for (int i = 0; i < AllVertices.Count; i++)
+                for (int j = 0; j < AllVertices.Count; j++)
+                    if (i != j && shortest[i, j] == 0)
+                        shortest[i, j] = double.PositiveInfinity;
+        }
+
+        private int[] SearchAllVerticesInCycle(int cycleStartVertex, int[] pred)
+        {
+            int vertexInCycle = pred[cycleStartVertex];
             Stack<int> cycle = new();
             cycle.Push(cycleStartVertex);
 
             while (vertexInCycle != cycleStartVertex)
             {
                 cycle.Push(vertexInCycle);
-                vertexInCycle = _pred[vertexInCycle];
+                vertexInCycle = pred[vertexInCycle];
             }
 
             return cycle.ToArray();
         }
 
-        private int FindingCycleStartVertex(Edge edge)
+        private int FindingCycleStartVertex(Edge edge, int[] pred)
         {
             bool[] visited = new bool[AllVertices.Count];
             int thisVertex = edge.EndVertex;
@@ -118,23 +158,23 @@
             while (visited[thisVertex] == false)
             {
                 visited[thisVertex] = true;
-                thisVertex = _pred[thisVertex];
+                thisVertex = pred[thisVertex];
             }
 
             return thisVertex;
         }
 
-        private void InitializeShortestAndPred(int vertex)
+        private void InitializeShortestAndPred(int vertex, out double[] shortest, out int[] pred)
         {
-            _shortest = new double[AllVertices.Count];
-            _pred = new int[AllVertices.Count];
+            shortest = new double[AllVertices.Count];
+            pred = new int[AllVertices.Count];
 
-            for (int i = 0; i < _shortest.Length; i++)
+            for (int i = 0; i < shortest.Length; i++)
                 if (i != vertex - 1)
-                    _shortest[i] = double.PositiveInfinity;
+                    shortest[i] = double.PositiveInfinity;
 
             foreach (var item in AllVertices)
-                _pred[item - 1] = -1;
+                pred[item - 1] = -1;
         }
 
         private List<int> GetLinearOrderedVertices(Dictionary<int, int> inDegree, Stack<int> next)
@@ -207,12 +247,12 @@
             return result;
         }
 
-        private void Relax(Edge edge)
+        private void Relax(Edge edge, double[] shortest, int[] pred)
         {
-            if (_shortest[edge.StartVertex - 1] + edge.Weight < _shortest[edge.EndVertex - 1])
+            if (shortest[edge.StartVertex - 1] + edge.Weight < shortest[edge.EndVertex - 1])
             {
-                _shortest[edge.EndVertex - 1] = _shortest[edge.StartVertex - 1] + edge.Weight;
-                _pred[edge.EndVertex - 1] = edge.StartVertex;
+                shortest[edge.EndVertex - 1] = shortest[edge.StartVertex - 1] + edge.Weight;
+                pred[edge.EndVertex - 1] = edge.StartVertex;
             }
         }
     }
