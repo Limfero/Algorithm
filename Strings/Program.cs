@@ -8,7 +8,7 @@
 
             int[,] LCSTable = ComputeLCSTable(first, second);
 
-            string longestCommonSubsequence = AssembleLCS(first, second, LCSTable, first.Length - 1, second.Length - 1);
+            string longestCommonSubsequence = AssembleLCS(first, second, LCSTable, first.Length, second.Length);
 
             WriteTable(LCSTable);
 
@@ -17,17 +17,11 @@
 
         public static int[,] ComputeLCSTable(string first, string second)
         {
-            int[,] result = new int[first.Length, second.Length];
+            int[,] result = new int[first.Length + 1, second.Length + 1];
 
-            for (int i = 0; i < first.Length; i++)
-                result[i, 0] = 0;
-
-            for (int i = 0; i < second.Length; i++)
-                result[0, i] = 0;
-
-            for (int i = 1; i < first.Length; i++)
-                for (int j = 1; j < second.Length; j++)
-                    if (first[i] == second[j])
+            for (int i = 1; i <= first.Length; i++)
+                for (int j = 1; j <= second.Length; j++)
+                    if (first[i - 1] == second[j - 1])
                         result[i, j] = result[i - 1, j - 1] + 1;
                     else
                         result[i, j] = (new int[2] { result[i, j - 1], result[i - 1, j] }).Max();
@@ -35,17 +29,17 @@
             return result;
         }
 
-        public static string AssembleLCS(string first, string second, int[,] LCSTable, int i, int j)
+        public static string AssembleLCS(string first, string second, int[,] LCSTable, int lengthFirst, int lengthSecond)
         {
-            if (LCSTable[i, j] == 0)
+            if (LCSTable[lengthFirst, lengthSecond] == 0)
                 return "";
 
-            if (first[i] == second[j])
-                return AssembleLCS(first, second, LCSTable, i - 1, j - 1) + first[i];
-            else if (LCSTable[i, j - 1] > LCSTable[i - 1, j])
-                return AssembleLCS(first, second, LCSTable, i, j - 1);
+            if (first[lengthFirst - 1] == second[lengthSecond - 1])
+                return AssembleLCS(first, second, LCSTable, lengthFirst - 1, lengthSecond - 1) + first[lengthFirst - 1];
+            else if (LCSTable[lengthFirst, lengthSecond - 1] > LCSTable[lengthFirst - 1, lengthSecond])
+                return AssembleLCS(first, second, LCSTable, lengthFirst, lengthSecond - 1);
             else
-                return AssembleLCS(first, second, LCSTable, i - 1, j);
+                return AssembleLCS(first, second, LCSTable, lengthFirst - 1, lengthSecond);
         }
 
         private static void WriteTable(int[,] LCSTable)
