@@ -24,7 +24,7 @@ namespace Graphs
             graph.AddEdge(new(8, 13, 1));
             graph.AddEdge(new(13, 14, 1));
 
-            int[] ints = graph.TopologicalSort();
+            int[] linearSort = graph.TopologicalSort();
 
             graph = new();
 
@@ -40,19 +40,38 @@ namespace Graphs
             graph.AddEdge(new(3, 5, -4));
 
             double[] shortest = graph.Dijkstra(1);
-            double[] shortestBF = graph.BellmanFord(1);
+            double[] shortestBF = (double[])graph.BellmanFord(1)[0];
             int[] cycle = graph.FindNegativeWeightCycle();
 
-            Write(ints);
+            graph = new();
+            graph.AddEdge(new(1, 2, 3));
+            graph.AddEdge(new(2, 4, 1));
+            graph.AddEdge(new(4, 1, 2));
+            graph.AddEdge(new(1, 3, 8));
+            graph.AddEdge(new(3, 2, 4));
+            graph.AddEdge(new(4, 3, -5));
+
+            Dictionary<string, double> result = graph.FloydWarshall();
+
+            Write(linearSort);
             Write(shortest);
             Write(shortestBF);
             Write(cycle);
+            Write(result);
         }
 
         private static void Write(Array array)
         {
             foreach (var vertex in array)
                 Console.Write("{0} ", vertex);
+
+            Console.WriteLine();
+        }
+
+        private static void Write(Dictionary<string, double> result)
+        {
+            foreach (var item in result)
+                Console.WriteLine("{0}: {1}", item.Key, item.Value);
 
             Console.WriteLine();
         }
