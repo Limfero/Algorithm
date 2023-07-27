@@ -24,6 +24,8 @@
             Console.WriteLine(longestCommonSubsequence);
 
             WriteTransformTables(tables);
+
+            Console.WriteLine("\n{0}", AssembleTransformation((string[,])tables[1], first.Length, second.Length));
         }
 
         private static void WriteTransformTables(List<Array> tables)
@@ -65,13 +67,26 @@
                 return AssembleLCS(first, second, LCSTable, lengthFirst - 1, lengthSecond);
         }
 
-        private static List<Array> ComputeTransformTables(string first, string second, int copyingCost, int replacementCost, int removalСost, int insertCost)
+        public static List<Array> ComputeTransformTables(string first, string second, int copyingCost, int replacementCost, int removalСost, int insertCost)
         {
             InitializationCostAndOpArrays(first, second, removalСost, insertCost, out int[,] cost, out string[,] op);
 
             SetMinimizedValueOfAllowableOperations(first, second, copyingCost, replacementCost, removalСost, insertCost, cost, op);
 
             return new List<Array>() { cost, op};
+        }
+
+        public static string AssembleTransformation(string[,] op, int i, int j)
+        {
+            if (i == 0 && j == 0)
+                return string.Empty;
+
+            if (op[i, j].Split(" ")[0] == Copy.Split(" ")[0] || op[i, j].Split(" ")[0] == Replace.Split(" ")[0])
+                return AssembleTransformation(op, i - 1, j - 1) + op[i, j] + "\n";
+            else if (op[i, j].Split(" ")[0] == Delete.Split(" ")[0])
+                return AssembleTransformation(op, i - 1, j) + op[i, j] + "\n";
+            else
+                return AssembleTransformation(op, i, j - 1) + op[i, j] + "\n";
         }
 
         private static void InitializationCostAndOpArrays(string first, string second, int removalСost, int insertCost, out int[,] cost, out string[,] op)
